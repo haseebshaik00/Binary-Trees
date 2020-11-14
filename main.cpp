@@ -56,13 +56,23 @@ void inorderPrint(BinaryTreeNode *root)
     inorderPrint(root->right);
 }
 
+int BinaryTreeHeight(BinaryTreeNode *root)
+{
+    if(root==NULL)
+        return 0;
+    int left_height = BinaryTreeHeight(root->left);
+    int right_height = BinaryTreeHeight(root->right);
+    return max(left_height,right_height) + 1;
+}
+
 int main() {
     BinaryTreeNode* root = preorderBuild(); //Input : 3 4 -1 6 -1 -1 5 1 -1 -1 -1
-    cout<<endl<<"Preorder :";
+    cout<<endl<<"Preorder : ";
     preorderPrint(root);    // Output : 3 4 6 5 1
-    cout<<endl<<"Postorder :";
+    cout<<endl<<"Postorder : ";
     postorderPrint(root);   // Output : 6 4 1 5 3
-    cout<<endl<<"Inorder :";
+    cout<<endl<<"Inorder : ";
     inorderPrint(root);     // Output : 4 6 3 1 5
+    cout<<endl<<"Height of Binary Tree : "<<BinaryTreeHeight(root)<<endl;
 	return 0;
 }
