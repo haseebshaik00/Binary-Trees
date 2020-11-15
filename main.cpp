@@ -1,4 +1,5 @@
 #include<iostream>
+#include<queue>
 using namespace std;
 
 class BinaryTreeNode
@@ -65,6 +66,45 @@ int BinaryTreeHeight(BinaryTreeNode *root)
     return max(left_height,right_height) + 1;
 }
 
+void printKthlevel(BinaryTreeNode *root, int k)
+{
+    if(root==NULL)
+        return;
+    if(k==1)
+    {
+        cout<<root->data<<" ";
+        return;
+    }
+    printKthlevel(root->left,k-1);
+    printKthlevel(root->right,k-1);
+    return;
+}
+
+void levelorderPrint(BinaryTreeNode *root)
+{
+    int height = BinaryTreeHeight(root);
+    cout<<"Level Order : ";
+    for(int i=1;i<=height;i++)
+        printKthlevel(root, i);
+    cout<<endl;
+}
+
+void bfs(BinaryTreeNode *root)
+{
+    queue<BinaryTreeNode *> q;
+    q.push(root);
+    while(!q.empty())
+    {
+        BinaryTreeNode *f=q.front();
+        q.pop();
+        cout<<f->data<<" ";
+        if(f->left)
+            q.push(f->left);
+        if(f->right)
+            q.push(f->right);
+    }
+}
+
 int main() {
     BinaryTreeNode* root = preorderBuild(); //Input : 3 4 -1 6 -1 -1 5 1 -1 -1 -1
     cout<<endl<<"Preorder : ";
@@ -74,5 +114,8 @@ int main() {
     cout<<endl<<"Inorder : ";
     inorderPrint(root);     // Output : 4 6 3 1 5
     cout<<endl<<"Height of Binary Tree : "<<BinaryTreeHeight(root)<<endl;
+    levelorderPrint(root);
+    cout<<"BFS Traversal : ";
+    bfs(root);
 	return 0;
 }
