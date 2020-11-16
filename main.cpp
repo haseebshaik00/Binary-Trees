@@ -82,7 +82,7 @@ void printKthlevel(BinaryTreeNode *root, int k)
 {
     if(root==NULL)
         return;
-    if(k==1)
+    if(k==0)
     {
         cout<<root->data<<" ";
         return;
@@ -96,7 +96,7 @@ void levelorderPrint(BinaryTreeNode *root)
 {
     int height = BinaryTreeHeight(root);
     cout<<"Level Order : ";
-    for(int i=1;i<=height;i++)
+    for(int i=0;i<height;i++)
         printKthlevel(root, i);
     cout<<endl;
 }
@@ -252,6 +252,51 @@ void rightView(BinaryTreeNode *root, int level, int &maxlevel)
     rightView(root->left,level+1,maxlevel);
 }
 
+int printAtDistK(BinaryTreeNode *root, BinaryTreeNode *target, int k)
+{
+    if(root==NULL)
+        return -1;
+    if(root==target)
+    {
+        printKthlevel(target,k);
+        return 0;
+    }
+    int DL = printAtDistK(root->left,target,k);
+    if(DL!=-1)
+    {
+        if(DL+1==k)
+            cout<<root->data<<" ";
+        else
+            printKthlevel(root->right,k-2-DL);
+        return 1+DL;
+    }
+    int DR = printAtDistK(root->right,target,k);
+    if(DR!=-1)
+    {
+        if(DR+1==k)
+            cout<<root->data<<" ";
+        else
+            printKthlevel(root->left,k-2-DR);
+        return 1+DR;
+    }
+    return -1;
+}
+
+BinaryTreeNode * lca(BinaryTreeNode *root, int a, int b)
+{
+    if(root==NULL)
+        return NULL;
+    if(root->data==a || root->data==b)
+        return root;
+    BinaryTreeNode *left = lca(root->left,a,b);
+    BinaryTreeNode *right = lca(root->right,a,b);
+    if(left!=NULL && right!=NULL)
+        return root;
+    if(left!=NULL)
+        return left;
+    return right;
+}
+
 int main() {
     BinaryTreeNode* root = preorderBuild(); //Input : 3 4 -1 6 -1 -1 5 1 -1 -1 -1 or 8 10 1 -1 -1 6 9 -1 -1 7 -1 -1 3 -1 14 13 -1 -1 -1
     cout<<endl<<"Preorder : ";
@@ -270,7 +315,7 @@ int main() {
     PairDiameter p = fastDiameter(root);
     cout<<"Optimized Height : "<<p.height<<endl;
     cout<<"Optimized Diameter : "<<p.diameter<<endl;
-	sumReplacement(root);
+	//sumReplacement(root);
 	cout<<"After Sum Replacement : ";
 	preorderPrint(root);
 	cout<<endl;
@@ -287,12 +332,18 @@ int main() {
     int pre[] = {1,2,3,4,8,5,6,7};
     BinaryTreeNode *root2 = treeFromPreIn(in,pre,0,7);
     bfs(root2);
-    cout<<"Before    Mirroring : "<<endl;
+    cout<<"Before Mirroring : "<<endl;
     bfs(root);
-    mirror(root);
+    //mirror(root);
     cout<<"After Mirroring : "<<endl;
     bfs(root);
+    cout<<"Right View : ";
     int maxlevel=-1;
     rightView(root,0,maxlevel);
+    cout<<endl<<"Kth dist nodes : ";
+    BinaryTreeNode * target = root->left;
+    printAtDistK(root,target,1);
+    cout<<endl;
+    cout<<"LCA : "<<lca(root,1,9)->data<<endl;
 	return 0;
 }
