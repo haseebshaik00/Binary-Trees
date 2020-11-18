@@ -532,6 +532,6 @@ int main() {
     //int prem[] =  {1 ,3 ,7 ,6 ,2 ,5 ,4};
     //BinaryTreeNode *root12 = treeFromPrePreM(pre,prem,0,6);
     //bfs(root12);
-    cout<<endl<<"Binary Search Tress"<<endl;
+    cout<<endl<<endl<<"Binary Search Tress"<<endl;
 	return 0;
 }
