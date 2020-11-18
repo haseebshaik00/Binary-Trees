@@ -32,13 +32,21 @@ BinaryTreeNode* preorderBuild()
 {
     int d;
     cin>>d;
-
     if(d==-1)
         return NULL;
-
     BinaryTreeNode *root = new BinaryTreeNode(d);
     root->left=preorderBuild();
     root->right=preorderBuild();
+    return root;
+}
+
+BinaryTreeNode * levelorderBuild(BinaryTreeNode *root,int a[],int i,int n)
+{
+    if(i>n)
+        return NULL;
+    root = new BinaryTreeNode(a[i]);
+    root->left = levelorderBuild(root->left,a,2*i+1,n);
+    root->right = levelorderBuild(root->right,a,2*i+2,n);
     return root;
 }
 
@@ -230,6 +238,112 @@ BinaryTreeNode * treeFromPreIn(int in[],int pre[],int s,int e)
     return root;
 }
 
+BinaryTreeNode * treeFromPostIn(int in[],int post[],int s,int e)
+{
+    static int f = 7;   // static cz when the recursion comes back the variable will backtrack and we don't want that
+    if(s>e)
+        return NULL;
+    BinaryTreeNode *root  = new BinaryTreeNode(post[f]);
+    int index = -1;
+    for(int j=s;j<=e;j++)
+    {
+        if(in[j]==post[f])
+        {
+            index=j;
+            break;
+        }
+    }
+    f--;
+    root->right = treeFromPostIn(in,post,index+1,e);
+    root->left = treeFromPostIn(in,post,s,index-1);
+    return root;
+}
+
+int search(int a[], int s, int e, int value)
+{
+    for (int i = s; i <= e; i++)
+        if (a[i] == value)
+            return i;
+    return -1;
+}
+
+int *extrackKeys(int in[], int level[], int m, int n)
+{
+    int *newlevel = new int[m+5];
+    int j = 0;
+    for (int i = 0; i < n; i++)
+        if (search(in, 0, m-1, level[i]) != -1)
+            {
+                newlevel[j] = level[i];
+                j++;
+            }
+    return newlevel;
+}
+
+BinaryTreeNode *treeFromLevelIn(int in[], int level[], int s, int e,int n)
+{
+    if(s>e || n<=0)
+        return NULL;
+    BinaryTreeNode *root = new BinaryTreeNode(level[0]);
+    if (s == e)
+        return root;
+    int i = search(in, s, e, root->data);
+    int *llevel  = extrackKeys(in, level, i, n);
+    int *rlevel  = extrackKeys(in + i + 1, level, e-i, n);
+    root->left = treeFromLevelIn(in, llevel, s, i-1, i-s);
+    root->right = treeFromLevelIn(in, rlevel, i+1, e, e-i);
+    return root;
+}
+
+BinaryTreeNode * treeFromPrePost(int pre[],int post[],int s,int e)
+{
+    static int i=0;
+    if(s>e)
+        return NULL;
+    BinaryTreeNode *root  = new BinaryTreeNode(pre[i]);
+    i++;
+    int index = -1;
+    for(int j=s;j<=e;j++)
+    {
+        if(post[j]==pre[i])
+        {
+            index=j;
+            break;
+        }
+    }
+    if(index!=-1)
+    {
+        root->left = treeFromPrePost(pre,post,s,index);
+        root->right = treeFromPrePost(pre,post,index+1,e);
+    }
+    return root;
+}
+
+BinaryTreeNode * treeFromPrePreM(int pre[],int prem[],int s,int e)
+{
+    static int i=0;
+    if(s>e)
+        return NULL;
+    BinaryTreeNode *root = new BinaryTreeNode(pre[i]);
+    i++;
+    int index=-1;
+    for (int j=s; j<=e;j++)
+    {
+        if (pre[i] == prem[j])
+        {
+            index=j;
+            break;
+        }
+    }
+    if(index!=-1)
+    {
+        root->left = treeFromPrePreM(pre,prem,index,e);
+        root->right = treeFromPrePreM(pre,prem,s+1,index-1);
+    }
+    return root;
+}
+
+
 void mirror(BinaryTreeNode *root)
 {
     if(root==NULL)
@@ -297,6 +411,57 @@ BinaryTreeNode * lca(BinaryTreeNode *root, int a, int b)
     return right;
 }
 
+class PairMaxSum
+{
+public:
+    int branch_sum;
+    int max_sum;
+    PairMaxSum ()
+    {
+        branch_sum=0;
+        max_sum = 0;
+    }
+};
+
+PairMaxSum maxSumPath(BinaryTreeNode *root)
+{
+    PairMaxSum p;
+    if(root==NULL)
+        return p;
+    PairMaxSum left = maxSumPath(root->left);
+    PairMaxSum right = maxSumPath(root->right);
+    int op1 = root->data;
+    int op2 = left.branch_sum + root->data;
+    int op3 = right.branch_sum + root->data;
+    int op4 = left.branch_sum + right.branch_sum + root->data;
+
+    int current_ans_through_root = max(op1,max(op2,max(op3,op4)));
+
+    p.branch_sum = max(left.branch_sum,max(right.branch_sum,0))+root->data;
+    p.max_sum = max(left.max_sum,max(right.max_sum,current_ans_through_root));
+    return p;
+}
+
+int nodeLength(BinaryTreeNode *root, int key, int level)
+{
+    if(root==NULL)
+        return -1;
+    if(root->data==key)
+        return level;
+    int left = nodeLength(root->left,key,level+1);
+    if(left!=-1)
+        return left;
+    return nodeLength(root->right,key,level+1);
+}
+
+int findDistance(BinaryTreeNode *root, int a, int b)
+{
+    BinaryTreeNode *la = lca(root,a,b);
+    int l1 = nodeLength(la,a,0);
+    int l2 = nodeLength(la,b,0);
+    return l1+l2;
+}
+
 int main() {
     BinaryTreeNode* root = preorderBuild(); //Input : 3 4 -1 6 -1 -1 5 1 -1 -1 -1 or 8 10 1 -1 -1 6 9 -1 -1 7 -1 -1 3 -1 14 13 -1 -1 -1
     cout<<endl<<"Preorder : ";
@@ -344,6 +509,29 @@ int main() {
     BinaryTreeNode * target = root->left;
     printAtDistK(root,target,1);
     cout<<endl;
-    cout<<"LCA : "<<lca(root,1,9)->data<<endl;
+    cout<<"LCA : "<<lca(root,6,1)->data<<endl;
+    cout<<"Max Sum Path : "<<maxSumPath(root).max_sum<<endl;
+    cout<<"Shortest Distance : "<<findDistance(root,6,1)<<endl;
+    int a1[] = {10,20,30,40,50,60,70,80,90};
+    BinaryTreeNode *root6;
+    BinaryTreeNode *root7 = levelorderBuild(root,a1,0,8);
+    bfs(root6);
+    int in1[]   = {4, 8, 2, 5, 1, 6, 3, 7};
+    int post[] = {8, 4, 5, 2, 6, 7, 3, 1};
+    //BinaryTreeNode *root9 = treeFromPostIn(in1,post,0,7);
+    //bfs(root9);
+    //int in2[]    = {4, 8, 10, 12, 14, 20, 22};
+    //int level[] = {20, 8, 22, 4, 12, 10, 14};
+    //BinaryTreeNode *root10 = treeFromLevelIn(in2,level,0,6,7);
+    //bfs(root10);
+    //int pre[] = {1, 2, 4, 8, 9, 5, 3, 6, 7};
+    //int post[] = {8, 9, 4, 5, 2, 6, 7, 3, 1};
+    //BinaryTreeNode *root11 = treeFromPrePost(pre,post,0,8);
+    //bfs(root11);
+    //int pre[] = {1, 2, 4, 5, 3, 6, 7};
+    //int prem[] =  {1 ,3 ,7 ,6 ,2 ,5 ,4};
+    //BinaryTreeNode *root12 = treeFromPrePreM(pre,prem,0,6);
+    //bfs(root12);
+    cout<<endl<<"Binary Search Tress"<<endl;
 	return 0;
 }
