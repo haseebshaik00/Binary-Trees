@@ -462,7 +462,85 @@ int findDistance(BinaryTreeNode *root, int a, int b)
     return l1+l2;
 }
 
+BinaryTreeNode *BSTinsertNode(BinaryTreeNode *bstroot, int d)
+{
+    if(bstroot==NULL)
+        return new BinaryTreeNode(d);
+    if(d<=bstroot->data)
+        bstroot->left=BSTinsertNode(bstroot->left,d);
+    else
+        bstroot->right=BSTinsertNode(bstroot->right,d);
+    return bstroot;
+}
+
+BinaryTreeNode *BSTbuild()
+{
+    int d;
+    cin>>d;
+    BinaryTreeNode *bstroot = NULL;
+    while(d!=-1)
+    {
+        bstroot = BSTinsertNode(bstroot, d);
+        cin>>d;
+    }
+    return bstroot;
+}
+
+bool BSTSearch(BinaryTreeNode *bstroot, int d)
+{
+    if(bstroot==NULL)
+        return false;
+    if(bstroot->data==d)
+        return true;
+    if(d<=bstroot->data)
+        return BSTSearch(bstroot->left,d);
+    else
+        return BSTSearch(bstroot->right,d);
+}
+
+//https://ide.codingblocks.com/s/23088
+BinaryTreeNode *BSTdelete(BinaryTreeNode *bstroot, int d)
+{
+    if(bstroot==NULL)
+        return NULL;
+    if(d<bstroot->data)
+        bstroot->left = BSTdelete(bstroot->left,d);
+    else if(d==bstroot->data)
+    {
+        if(bstroot->left==NULL && bstroot->right==NULL)
+        {
+            delete bstroot;
+            return NULL;
+        }
+        else if(bstroot->left!=NULL && bstroot->right==NULL)
+        {
+            BinaryTreeNode *temp = bstroot->left;
+            delete bstroot;
+            return temp;
+        }
+        else if(bstroot->left==NULL && bstroot->right!=NULL)
+        {
+            BinaryTreeNode *temp = bstroot->left;
+            delete bstroot;
+            return temp;
+        }
+        else
+        {
+            BinaryTreeNode *temp = bstroot->right;
+            while(temp->left!=NULL)
+                temp=temp->left;
+            bstroot->data = temp->data;
+            bstroot->right = BSTdelete(bstroot->right,temp->data);
+            return bstroot;
+        }
+    }
+    else
+        bstroot->right = BSTdelete(bstroot->right,d);
+    return bstroot;
+}
+
 int main() {
+    /*
     BinaryTreeNode* root = preorderBuild(); //Input : 3 4 -1 6 -1 -1 5 1 -1 -1 -1 or 8 10 1 -1 -1 6 9 -1 -1 7 -1 -1 3 -1 14 13 -1 -1 -1
     cout<<endl<<"Preorder : ";
     preorderPrint(root);    // Output : 3 4 6 5 1
@@ -512,12 +590,12 @@ int main() {
     cout<<"LCA : "<<lca(root,6,1)->data<<endl;
     cout<<"Max Sum Path : "<<maxSumPath(root).max_sum<<endl;
     cout<<"Shortest Distance : "<<findDistance(root,6,1)<<endl;
-    int a1[] = {10,20,30,40,50,60,70,80,90};
-    BinaryTreeNode *root6;
-    BinaryTreeNode *root7 = levelorderBuild(root,a1,0,8);
-    bfs(root6);
-    int in1[]   = {4, 8, 2, 5, 1, 6, 3, 7};
-    int post[] = {8, 4, 5, 2, 6, 7, 3, 1};
+    //int a1[] = {10,20,30,40,50,60,70,80,90};
+    //BinaryTreeNode *root6;
+    //BinaryTreeNode *root7 = levelorderBuild(root,a1,0,8);
+    //bfs(root6);
+    //int in1[]   = {4, 8, 2, 5, 1, 6, 3, 7};
+    //int post[] = {8, 4, 5, 2, 6, 7, 3, 1};
     //BinaryTreeNode *root9 = treeFromPostIn(in1,post,0,7);
     //bfs(root9);
     //int in2[]    = {4, 8, 10, 12, 14, 20, 22};
@@ -532,6 +610,15 @@ int main() {
     //int prem[] =  {1 ,3 ,7 ,6 ,2 ,5 ,4};
     //BinaryTreeNode *root12 = treeFromPrePreM(pre,prem,0,6);
     //bfs(root12);
-    cout<<endl<<endl<<"Binary Search Tress"<<endl;
+    cout<<endl<<"Binary Search Tress"<<endl;
+    */
+    BinaryTreeNode *bstroot = BSTbuild(); // Input : 5 3 7 1 6 8 -1
+    bfs(bstroot);
+    if(BSTSearch(bstroot,9))
+        cout<<"Present"<<endl;
+    else
+        cout<<"Absent"<<endl;
+    bstroot=BSTdelete(bstroot, 5);
+    bfs(bstroot);
 	return 0;
 }
