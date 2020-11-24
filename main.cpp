@@ -1,5 +1,8 @@
 #include<iostream>
+#include<climits>
 #include<queue>
+#include<cmath>
+#include<map>
 using namespace std;
 
 class BinaryTreeNode
@@ -343,7 +346,6 @@ BinaryTreeNode * treeFromPrePreM(int pre[],int prem[],int s,int e)
     return root;
 }
 
-
 void mirror(BinaryTreeNode *root)
 {
     if(root==NULL)
@@ -520,7 +522,7 @@ BinaryTreeNode *BSTdelete(BinaryTreeNode *bstroot, int d)
         }
         else if(bstroot->left==NULL && bstroot->right!=NULL)
         {
-            BinaryTreeNode *temp = bstroot->left;
+            BinaryTreeNode *temp = bstroot->rightt;
             delete bstroot;
             return temp;
         }
@@ -537,6 +539,109 @@ BinaryTreeNode *BSTdelete(BinaryTreeNode *bstroot, int d)
     else
         bstroot->right = BSTdelete(bstroot->right,d);
     return bstroot;
+}
+
+bool isBST(BinaryTreeNode *bstroot, int minV=INT_MIN, int maxV=INT_MAX)
+{
+    if(bstroot==NULL)
+        return true;
+    if(bstroot->data>minV && bstroot->data<maxV && isBST(bstroot->left, minV, bstroot->data) && isBST(bstroot->right, bstroot->data, maxV))
+        return true;
+    return false;
+}
+
+class BSTLL
+{
+public:
+    BinaryTreeNode *head;
+    BinaryTreeNode *tail;
+};
+
+BSTLL flatten(BinaryTreeNode *bstroot)
+{
+    BSTLL l;
+    if(bstroot==NULL)
+    {
+        l.head=NULL;
+        l.tail=NULL;
+        return l;
+    }
+    // Leaf Node
+    if(bstroot->left==NULL && bstroot->right==NULL)
+    {
+        l.head=bstroot;
+        l.tail=bstroot;
+        return l;
+    }
+    // Left is Not NULL
+    if(bstroot->left!=NULL && bstroot->right==NULL)
+    {
+        BSTLL leftLL = flatten(bstroot->left);
+        leftLL.tail->right = bstroot;
+        l.head = leftLL.head;
+        l.tail=bstroot;
+        return l;
+    }
+    //Right is Not NULL
+    if(bstroot->left==NULL && bstroot->right!=NULL)
+    {
+        BSTLL rightLL = flatten(bstroot->right);
+        bstroot->right = rightLL.head;
+        l.head = bstroot;
+        l.tail = rightLL.tail;
+        return l;
+    }
+    //Both Sides are not NULL
+    BSTLL leftLL = flatten(bstroot->left);
+    BSTLL rightLL = flatten(bstroot->right);
+    leftLL.tail->right = bstroot;
+    bstroot->right = rightLL.head;
+    l.head = leftLL.head;
+    l.tail = rightLL.tail;
+    return l;
+}
+
+BinaryTreeNode *arraytoBST(BinaryTreeNode *bstroot, int a[], int s, int e, int n)
+{
+    if(s>e)
+        return NULL;
+    int mid = (s+e)/2;
+    bstroot = new BinaryTreeNode(a[mid]);
+    bstroot->left = arraytoBST(bstroot->left, a, s, mid-1, n);
+    bstroot->right = arraytoBST(bstroot->right, a, mid+1, e, n);
+    return bstroot;
+}
+
+int recFact(int n)
+{
+    if(n==0)
+        return 1;
+    return n*recFact(n-1);
+}
+
+int catalanNo(int n)
+{
+    return recFact(2*n)/(pow(recFact(n),2)*(n+1));
+}
+
+void helper(BinaryTreeNode *rt,map<int,pair<int,int>>&hashmap,int level,int hd){
+	if(rt==NULL)return;
+	if(hashmap.find(hd)==hashmap.end())
+		hashmap.insert({hd,{rt->data,level}});
+	else{
+		pair<int ,int >p=hashmap[hd];
+		if(level>=p.second)
+			hashmap[hd]={rt->data,level};
+	}
+	helper(rt->left,hashmap,level+1,hd-1);
+	helper(rt->right,hashmap,level+1,hd+1);
+}
+
+void TreeBottomView(BinaryTreeNode *rt){
+	map<int,pair<int,int>>hashmap;
+	helper(rt,hashmap,0,0);
+	for(auto it:hashmap)
+		cout<<it.second.first<<" ";
 }
 
 int main() {
@@ -605,7 +710,7 @@ int main() {
     //int pre[] = {1, 2, 4, 8, 9, 5, 3, 6, 7};
     //int post[] = {8, 9, 4, 5, 2, 6, 7, 3, 1};
     //BinaryTreeNode *root11 = treeFromPrePost(pre,post,0,8);
-    //bfs(root11);
+    //bfs(root11)
     //int pre[] = {1, 2, 4, 5, 3, 6, 7};
     //int prem[] =  {1 ,3 ,7 ,6 ,2 ,5 ,4};
     //BinaryTreeNode *root12 = treeFromPrePreM(pre,prem,0,6);
@@ -618,7 +723,27 @@ int main() {
         cout<<"Present"<<endl;
     else
         cout<<"Absent"<<endl;
-    bstroot=BSTdelete(bstroot, 5);
+    bstroot=BSTdelete(bstroot, 8);
     bfs(bstroot);
+    if(isBST(bstroot))
+        cout<<"BST"<<endl;
+    else
+        cout<<"Not a BST"<<endl;
+    BSTLL l = flatten(bstroot);
+    BinaryTreeNode *temp = l.head;
+    while(temp)
+    {
+        cout<<temp->data<<"->";
+        temp=temp->right;
+    }
+    int a[] = {1,2,3,4,5,6,7};
+    BinaryTreeNode *bstroot1;
+    bstroot1 = arraytoBST(bstroot1, a, 0, 6, 7);
+    bfs(bstroot1);
+    cout<<"No. of BSTs possible = "<<catalanNo(3);
+    int a[] = {10,20,30,40,50,60,70,80,90};
+    BinaryTreeNode *root15;
+    BinaryTreeNode *root16 = levelorderBuild(root15,a,0,8);
+	TreeBottomView(root16);
 	return 0;
 }
