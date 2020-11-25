@@ -522,7 +522,7 @@ BinaryTreeNode *BSTdelete(BinaryTreeNode *bstroot, int d)
         }
         else if(bstroot->left==NULL && bstroot->right!=NULL)
         {
-            BinaryTreeNode *temp = bstroot->rightt;
+            BinaryTreeNode *temp = bstroot->right;
             delete bstroot;
             return temp;
         }
@@ -741,9 +741,9 @@ int main() {
     bstroot1 = arraytoBST(bstroot1, a, 0, 6, 7);
     bfs(bstroot1);
     cout<<"No. of BSTs possible = "<<catalanNo(3);
-    int a[] = {10,20,30,40,50,60,70,80,90};
+    int a1[] = {10,20,30,40,50,60,70,80,90};
     BinaryTreeNode *root15;
-    BinaryTreeNode *root16 = levelorderBuild(root15,a,0,8);
+    BinaryTreeNode *root16 = levelorderBuild(root15,a1,0,8);
 	TreeBottomView(root16);
 	return 0;
 }
